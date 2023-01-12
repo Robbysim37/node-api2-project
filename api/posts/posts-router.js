@@ -65,6 +65,45 @@ router.put("/:id", (req,res) => {
     }
 })
 
+router.delete("/:id", (req,res) => {
+    const id = req.params.id
+    let postToDelete = {}
+    dbFunctions.findById(id)
+    .then(postFound => {
+        if(postFound){
+            postToDelete = postFound
+        }
+    })
+    dbFunctions.remove(id)
+    .then(post => {
+        if(post){
+            res.status(200).json(postToDelete)
+        }else{
+            res.status(404).json({ message: "The post with the specified ID does not exist" })
+        }
+    })
+})
 
+router.get("/:id/comments", (req,res) => {
+    const id = req.params.id
+    let postconfirmed = false
+    dbFunctions.findById(id)
+    .then(post => {
+        if(post){
+            postconfirmed = true
+        }
+    })
+    dbFunctions.findPostComments(id)
+    .then(comments => {
+        if(postconfirmed){
+            res.status(200).json(comments)
+        }else{
+            res.status(404).json({ message: "The post with the specified ID does not exist" })
+        }
+    })
+    .catch(err => {
+        res.status(500).json({ message: "The comments information could not be retrieved" })
+    })
+})
 
 module.exports = router
